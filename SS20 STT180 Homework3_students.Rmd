@@ -1,0 +1,382 @@
+---
+title: "The Birth Data Project"
+author: "Heyue Cheng"
+date: "February 21, 2020"
+output:
+  html_document:
+    df_print: paged
+    number_sections: no
+    toc: yes
+    toc_depth: 3
+    toc_float: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      message = FALSE, 
+                      warning = FALSE,
+                      comment = NA)
+```
+
+
+The goal of this project is to do data analysis on baby births and populations using R studio to explore the distribution and tendency crossing recent 40 years in the United States by analyzing the relationship among geographical regions, states, races, baby weights, genders, and mother's age. Data visualization methods such as ggplots and boxplots are used in this project as well to help people draw patterns and make conclusions easily and precisely.
+
+The dataset contains information about births in the United States. The full data set is from the Centers for Disease Control. The data for this project is a "small" sample (chosen at random) of slightly over one million records from the full data set. The data for this project also only contain a subset of the variables in the full data set. 
+
+
+## Setting up
+
+Load `tidyverse`, which includes `dplyr`, `ggplot2`, `tidyr`, and other packages, and the load `knitr`.
+```{r echo=TRUE}
+library(tidyverse)
+library(knitr)
+```
+
+Read in the data and convert the data frame to a tibble.
+```{r echo=TRUE}
+birth_data <- read.csv("BirthData.csv", header = TRUE)
+birth_data <- as_tibble(birth_data)
+head(birth_data)
+attach(birth_data)
+```
+
+A glimpse of the data:
+```{r echo=TRUE}
+glimpse(birth_data)
+```
+
+The variables in the data set are:
+
+Variable | Description
+---------|------------
+`year` | the year of the birth
+`month` | the month of the birth
+`state` | the state where the birth occurred, including "DC" for Washington D.C.
+`is_male` | which is `TRUE` if the child is male, `FALSE` otherwise
+`weight_pounds` | the child's birth weight in pounds
+`mother_age` | the age of the mother    
+`child_race` | race of the child. 
+`plurality` | the number of children born as a result of the pregnancy, with 1 representing a single birth, 2 representing twins, etc.
+
+## Data structure and wrangling
+
+For both of Questions 1 and 2 you should show the R code used and the output of the  `str` and `glimpse` functions applied to the data frame. Use of dplyr functions and the pipe operator is highly recommended.
+
+### Question 1
+
+<style>
+div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
+</style>
+<div class = "blue">
+
+Create a variable called `region` in the data frame `birth_data` which takes the values `Northeast`, `Midwest`, `South`, and `West`.
+
+</div>
+
+Here are the states in each region:
+
+##### Northeast Region:
+
+Connecticut, Maine, Massachusetts, New Hampshire, Rhode Island and Vermont, New Jersey, New York, and Pennsylvania
+
+##### Midwest Region:
+
+Illinois, Indiana, Michigan, Ohio and Wisconsin,
+Iowa, Kansas, Minnesota, Missouri, Nebraska, North Dakota, and South Dakota
+
+##### South Region:
+
+Delaware, District of Columbia, Florida, Georgia, Maryland, North Carolina, South Carolina, Virginia, and West Virginia,
+Alabama, Kentucky, Mississippi, and Tennessee,
+Arkansas, Louisiana, Oklahoma, and Texas
+
+##### West Region:
+
+Arizona, Colorado, Idaho, Montana, Nevada, New Mexico, Utah and Wyoming,
+Alaska, California, Hawaii, Oregon and Washington
+
+```{r echo=TRUE}
+# Northeast = c('CT', 'ME', 'MA', 'NH', 'RI', 'VT', 'NJ', 'NY', 'PA' ))
+
+# Midwest = c('IL', 'IN', 'MI', 'OH', 'WI', 'IA', 'KS', 'MN', 'MO', 'NE', 'ND', 'SD'))
+
+# South = c('DE', 'DC', 'FL, KY', 'MS', 'TN', 'AR', 'LA', 'OK', 'TX', 'GA', 'MD', 'NC', 'SC', 'VA', 'WV', 'AL')) 
+
+# West = c('AZ', 'CO', 'ID', 'MT', 'NV', 'NM', 'UT', 'WY', 'AK', 'CA', 'HI', 'OR', 'WA'))
+
+
+birth_data$region[birth_data$state %in% c('CT', 'ME', 'MA', 'NH', 'RI', 'VT', 'NJ', 'PA', 'NY' )] = 'Northeast'
+
+birth_data$region[birth_data$state %in% c('IL', 'IN', 'MI', 'OH', 'WI', 'IA', 'KS', 'MN', 'MO', 'NE', 'ND', 'SD')] = 'Midwest'
+
+birth_data$region[birth_data$state %in% c('DE', 'DC', 'FL', 'KY', 'MS', 'TN', 'AR', 'LA', 'OK', 'TX', 'GA', 'MD', 'NC', 'SC', 'VA', 'WV', 'AL')] = 'South'
+
+birth_data$region[birth_data$state %in% c('AZ', 'CO', 'ID', 'MT', 'NV', 'NM', 'UT', 'WY', 'AK', 'CA', 'HI', 'OR', 'WA')] = 'West'
+
+head(birth_data)
+glimpse(birth_data)
+```
+
+### Question 2
+<style>
+div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
+</style>
+<div class = "blue">
+
+Create a variable in `birth_data` called `state_color` which takes the values `red`, `blue`, and `purple`, using the following divisions. 
+
+</div>
+
+##### Red:
+Alaska,
+Idaho,
+Kansas,
+Nebraska,
+North Dakota,
+Oklahoma,
+South Dakota,
+Utah,
+Wyoming,
+Texas,
+Alabama,
+Mississippi,
+South Carolina,
+Montana,
+Georgia,
+Missouri,
+Louisiana,
+Tennessee,
+Arkansas,
+Kentucky,
+Arizona,
+West Virginia.
+
+##### Purple:
+
+North Carolina,
+Virginia,
+Florida,
+Ohio,
+Colorado,
+Nevada,
+Indiana,
+Iowa,
+New Mexico.
+
+##### Blue:
+
+New Hampshire,
+Pennsylvania,
+California,
+Michigan,
+Illinois,
+Maryland,
+Delaware,
+New Jersey,
+Connecticut,
+Vermont,
+Maine,
+Washington,
+Oregon,
+Wisconsin,
+New York,
+Massachusetts,
+Rhode Island,
+Hawaii,
+Minnesota,
+District of Columbia.
+
+```{r echo=TRUE}
+# Red = 'AK', 'ID', 'KS', 'NE', 'ND', 'OK', 'SD', 'UT', 'WY', 'TX', 'AL', 'MS', 'SC', 'MT', 'GA', 'MO', 'LA', 'TN', 'AR', 'KY', 'AZ', 'WV'
+
+# Purple = 'NC', 'VA', 'FL', 'OH', 'CO', 'NV', 'IN', 'IA', 'NM'
+
+# Blue = 'NH', 'PA', 'CA', 'MI', 'IL', 'MD', 'DE', 'NJ', 'CT', 'VT', 'ME', 'WA', 'OR', 'WI', 'NY', 'MA', 'RI', 'HI', 'MN', 'DC' 
+
+birth_data$state_color[birth_data$state %in% c('AK', 'ID', 'KS', 'NE', 'ND', 'OK', 'SD', 'UT', 'WY', 'TX', 'AL', 'MS', 'SC', 'MT', 'GA', 'MO', 'LA', 'TN', 'AR', 'KY', 'AZ', 'WV')] = 'Red'
+
+birth_data$state_color[birth_data$state %in% c('NC', 'VA', 'FL', 'OH', 'CO', 'NV', 'IN', 'IA', 'NM')] = 'Purple'
+
+birth_data$state_color[birth_data$state %in% c('NH', 'PA', 'CA', 'MI', 'IL', 'MD', 'DE', 'NJ', 'CT', 'VT', 'ME', 'WA', 'OR', 'WI', 'NY', 'MA', 'RI', 'HI', 'MN', 'DC')] = 'Blue'
+
+head(birth_data)
+glimpse(birth_data)
+```
+
+Some of the variables have missing values, and these may be related to different data collection choices during different years. For example, possibly plurality wasn't recorded during some years, or state of birth wasn't recorded during some years. In this part we investigate using some `dplyr` functions.
+
+### Question 3
+
+<style>
+div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
+</style>
+<div class = "blue">
+
+Count the number of missing values in each variable in the data frame.
+
+</div>
+
+```{r echo=TRUE}
+# 1 is row, 2 is column
+apply(birth_data, 2, function(x)sum(is.na(x)))
+```
+
+### Question 4
+
+<style>
+div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
+</style>
+<div class = "blue">
+
+Use `group_by` and `summarize` to count the number of missing values of the two variables, `state` and `child_race`, for each year, and to also count the total number of observations per year. 
+
+Are there particular years when these two variables are either not available, or of limited availability?
+
+</div>
+
+```{r echo=TRUE}
+# NA count for 'state'
+
+# functions after 'groupby', don't add "dataset name$", if you do so, it will ignore your groupby function and make you fail in groupby.
+birth_data %>%
+group_by(year) %>%
+summarise(state = sum(is.na(state)), 
+          race = sum(is.na(child_race)),
+          num_obs = length(year)) # count for total numbers of observations
+```
+We can conclude from above tables that values for 'state' is missing from 1969 to 2004, and that for 'race' is missing from 1969 to 2002.
+
+### Question 5
+
+<style>
+div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
+</style>
+<div class = "blue">
+
+Create the following data frame which gives the counts, the mean weight of babies and the mean age of mothers for the six levels of `plurality`. Comment on what you notice about the relationship of plurality and birth weight, and the relationship of plurality and age of the mother.
+
+</div>
+
+```{r echo=TRUE}
+birth_data %>%
+group_by(plurality) %>%
+# 'data.frame' is not the only way to create a dataframe. "summarise()" also works
+summarise(count = n(), mean.weight = mean(weight_pounds, na.rm = TRUE), mean.age = mean(mother_age, na.rm = TRUE))
+```
+We found that the higher the plurality rank is, the heavier the baby is and the younger the mother is. On majority, mothers give a birth around the age of 26 with approximately 7 pounds of the baby.
+
+### Question 6
+
+<style>
+div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
+</style>
+<div class = "blue">
+
+Create a data frame which gives the counts, the mean weight of babies and the mean age of mothers for each combination of the three levels of `state_color` and the two levels of `is_male`. 
+</div>
+
+```{r echo=TRUE}
+birth_data %>%
+# group by multiply variables
+group_by(state_color, is_male,) %>%
+summarise(count = n(), mean.weight = mean(weight_pounds, na.rm = TRUE), mean.age = mean(mother_age, na.rm = TRUE))
+```
+
+## Data Visualisation:
+
+Combine `dplyr`with `ggplot2` to create graphical displays of the data. Use `filter`, `group_by`, and `summarize` build the required data frame.
+
+### Question 1
+<style>
+div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
+</style>
+<div class = "blue">
+
+Create a plot of mean age of mother versus year, which includes separate lines for each of the four regions of the country. (Don't include data for which the region is missing.)
+
+</div>
+
+```{r echo=TRUE}
+birth_data %>%
+filter(!is.na(region)) %>% # another way to exclude NA
+
+group_by(year, region) %>%
+summarise(mean.age = mean(mother_age, na.rm = TRUE)) %>%
+
+ggplot(aes(x=as.numeric(year), y=mean.age, color=region)) + # different colors based on regions
+geom_line(size = 0.8) + # traces
+labs(x='Year', y='Mean age')
+```
+
+### Question 2
+
+<style>
+div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
+</style>
+<div class = "blue">
+
+Create a graphic of mean age of mother versus year, which includes separate lines for each of the three values of `state_color`. (Don't include data for which `state_color` is missing.)
+
+```{r echo=TRUE}
+birth_data %>%
+filter(!is.na(state_color)) %>%
+
+group_by(year, state_color) %>%
+summarise(mean.age = mean(mother_age, na.rm = TRUE)) %>%
+
+ggplot(aes(x=as.numeric(year), y=mean.age, color=state_color)) +
+geom_line(size = 0.8) +
+labs(x='Year', y='Mean age') +
+
+# change the default color
+scale_color_manual(values = c('blue', 'purple', 'red'))
+```
+
+### Question 3
+
+<style>
+div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
+</style>
+<div class = "blue">
+
+Create a graphic of mean weight of the child versus year, which includes separate lines for the two top race categories, white and black. You'll want to investigate `scale_color_discrete` to change the legend.
+</div>
+
+```{r echo=TRUE}
+birth_data %>%
+# Pick only the 2 top races. The relation is 'union' here, so we should use 'OR'
+filter(child_race == 1 | child_race == 2) %>% 
+
+group_by(year, child_race) %>%
+summarise(mean.weight = mean(weight_pounds, na.rm = TRUE)) %>%
+
+ggplot(aes(x=as.numeric(year), y=mean.weight, color=as.character(child_race))) + # change numeric variables to character
+geom_line(size = 0.8) +
+# put 'color' function into labs to change the name of legend
+labs(x='Year', y='Mean weight', color = 'Race of child')
+```
+
+### Question 4
+
+<style>
+div.blue { background-color:#e6f0ff; border-radius: 5px; padding: 20px;}
+</style>
+<div class = "blue">
+
+Create a graphic showing side-by-side boxplots of the age of the mother for the four regions.
+</div>
+
+```{r echo=TRUE}
+birth_data %>%
+# summarise(mean.age = mean(mother_age, na.rm = TRUE)) %>%
+filter(!is.na(region)) %>%
+
+ggplot(aes(x=region, y=mother_age, color = region)) +
+geom_boxplot() + # boxplot
+labs(x='region', y='mother_age')
+```
+
+
+## Reference
+
+1. http://www.cdc.gov/nchs/data_access/Vitalstatsonline.htm
